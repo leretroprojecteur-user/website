@@ -9,6 +9,7 @@ import { utcToZonedTime } from "date-fns-tz";
 import { fr } from "date-fns/locale";
 
 import SetTitle from "@/app/details/[movieId]/set-title";
+import { safeFetch } from "@/lib/offline";
 import { MovieDetail } from "@/lib/types";
 import { checkNotNull, floatHourToString, safeDate } from "@/lib/util";
 
@@ -18,7 +19,7 @@ export default function Details() {
 
   useEffect(() => {
     (async () => {
-      setMovie(await (await fetch(`/details/api/${movieId}`)).json());
+      setMovie(await (await safeFetch(null, `/details/api/${movieId}`)).json());
     })();
   }, [movieId]);
 

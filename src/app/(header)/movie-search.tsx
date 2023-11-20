@@ -13,6 +13,7 @@ import React, {
   useState,
 } from "react";
 
+import { safeFetch } from "@/lib/offline";
 import { SearchMovie } from "@/lib/types";
 import { string_match } from "@/lib/util";
 
@@ -57,7 +58,7 @@ function Dropdown({ searchTerm }: { searchTerm: string }) {
 
   useEffect(() => {
     (async () => {
-      setMovies(await (await fetch("/api/all-movies")).json());
+      setMovies(await (await safeFetch([], "/api/all-movies")).json());
     })();
   }, []);
 

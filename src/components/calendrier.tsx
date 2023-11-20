@@ -28,6 +28,7 @@ import { utcToZonedTime } from "date-fns-tz";
 import { fr } from "date-fns/locale";
 
 import MovieTable from "@/components/movie-table";
+import { safeFetch } from "@/lib/offline";
 import { Movie } from "@/lib/types";
 import {
   checkNotNull,
@@ -39,12 +40,12 @@ import {
 import logo_square from "../assets/logo_square.png";
 
 async function getApiMovies(date: Date): Promise<Movie[]> {
-  return (await fetch(`/api/${format(date, "y-MM-dd")}`)).json();
+  return (await safeFetch([], `/api/${format(date, "y-MM-dd")}`)).json();
 }
 
 async function getAllApiMovies(date: Date): Promise<Movie[]> {
   return (
-    await fetch(`/admin/tous-les-films/api/${format(date, "y-MM-dd")}`)
+    await safeFetch([], `/admin/tous-les-films/api/${format(date, "y-MM-dd")}`)
   ).json();
 }
 

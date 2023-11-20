@@ -17,6 +17,7 @@ import { format, isSameMonth, parse } from "date-fns";
 import { fr } from "date-fns/locale";
 
 import MovieTable from "@/components/movie-table";
+import { safeFetch } from "@/lib/offline";
 import { MovieWithShowtimesByDay } from "@/lib/types";
 import {
   floatHourToString,
@@ -27,7 +28,7 @@ import {
 import logo_square from "../../../assets/logo_square.png";
 
 async function getApiMovies(): Promise<MovieWithShowtimesByDay[]> {
-  return (await fetch("/admin/semaine/api")).json();
+  return (await safeFetch([], "/admin/semaine/api")).json();
 }
 
 export default function Semaine() {

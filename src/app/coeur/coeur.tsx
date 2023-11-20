@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+import { safeFetch } from "@/lib/offline";
 import { Review } from "@/lib/types";
 import { safeDate } from "@/lib/util";
 
@@ -17,7 +18,7 @@ export default function Coeur() {
 
   useEffect(() => {
     (async () => {
-      setReviews(await (await fetch("/coeur/api")).json());
+      setReviews(await (await safeFetch([], "/coeur/api")).json());
     })();
   }, []);
 

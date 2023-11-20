@@ -1,0 +1,20 @@
+.offlineContainer {
+  top: 0;
+  left: 0;
+  position: fixed;
+  color: white;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  padding: 10px;
+  z-index: 99;
+  padding: 10px;
+  background-color: var(--red);
+}
+
+.centered {
+  flex-grow: 1;
+  text-align: center;
+}

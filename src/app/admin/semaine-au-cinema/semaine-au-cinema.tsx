@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { format, isSameMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 
+import { safeFetch } from "@/lib/offline";
 import { Movie } from "@/lib/types";
 import { checkNotNull, floatHourToString, getNextMovieWeek } from "@/lib/util";
 
@@ -47,7 +48,7 @@ export default function SemaineAuCinema() {
           week.map(
             async (day) =>
               (await (
-                await fetch(`/api/${format(day, "y-MM-dd")}`)
+                await safeFetch([], `/api/${format(day, "y-MM-dd")}`)
               ).json()) as Movie[],
           ),
         ),

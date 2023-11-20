@@ -12,7 +12,11 @@
 }
 * {
   color: inherit;
-  font-family: lora, georgia, times new roman, serif;
+  font-family:
+    lora,
+    georgia,
+    times new roman,
+    serif;
   box-sizing: border-box;
 }
 html {
@@ -319,6 +323,7 @@ select {
   max-width: 100%;
 }
 .post-image {
+  height: auto;
   width: min(100%, 700px);
   height: auto;
   display: block;

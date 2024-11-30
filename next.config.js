@@ -25,6 +25,12 @@ const nextConfig = {
       permanent: true,
     },
   ],
+  rewrites: async () => [
+    {
+      source: "/rss.xml",
+      destination: "/rss",
+    },
+  ],
 };
 
 module.exports = nextConfig;

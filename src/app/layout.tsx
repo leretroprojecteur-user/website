@@ -82,12 +82,30 @@ export const metadata: Metadata = {
   description:
     "Coup de projecteur sur les ressorties cinéma dans les salles parisiennes.",
   metadataBase: new URL("https://leretroprojecteur.com/"),
+  alternates: {
+    types: {
+      "application/rss+xml": [
+        {
+          url: "rss.xml",
+          title: "Le Rétroprojecteur - Coups de coeur RSS Feed",
+        },
+      ],
+    },
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <StrictMode>
       <html lang="fr" className="h-screen overflow-y-auto">
+        <head>
+          <link
+            rel="alternate"
+            type="application/rss+xml"
+            title="Le Rétroprojecteur - Coups de coeur RSS Feed"
+            href="/rss.xml"
+          />
+        </head>
         <body
           className={clsx(
             degular.variable,

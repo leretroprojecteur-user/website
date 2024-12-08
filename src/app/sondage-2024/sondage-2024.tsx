@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import React, { ReactNode, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { SearchResults } from "@/app/recherche/recherche";
 import RetroInput from "@/components/forms/retro-input";
@@ -136,88 +137,164 @@ interface ShareableContentProps {
   fullName: string;
 }
 
-const SHARE_CONFIG = {
-  spacing: {
-    contentPadding: 12, // px - padding around content
+const BASE = {
+  width: 500, // SVG width
+  padding: {
+    side: 20, // Side padding
+    stripe: 30, // Movie stripe height
+    movieGap: 10, // Gap between movies
+  },
+  height: {
+    title: 120, // Title section height
+    footer: 80, // Footer height
   },
 } as const;
 
 function ShareableContent({ rowsData, fullName }: ShareableContentProps) {
-  const filteredMovies = rowsData.filter((row) => row.movie !== "");
-  const cornerTextStyle = "font-bold text-retro-gray underline hidden lg:block";
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  // Get colors from Tailwind classes
+  const getColors = () => {
+    // Create temporary elements to get computed colors
+    const greenEl = document.createElement("div");
+    const grayEl = document.createElement("div");
+    greenEl.className = "bg-retro-green";
+    grayEl.className = "bg-retro-gray";
+    document.body.appendChild(greenEl);
+    document.body.appendChild(grayEl);
+
+    const green = window.getComputedStyle(greenEl).backgroundColor;
+    const gray = window.getComputedStyle(grayEl).backgroundColor;
+
+    document.body.removeChild(greenEl);
+    document.body.removeChild(grayEl);
+
+    return { green, gray };
+  };
+
+  // Update scale based on container width
+  useEffect(() => {
+    const updateScale = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        setScale(containerWidth / BASE.width);
+      }
+    };
+
+    updateScale();
+    window.addEventListener("resize", updateScale);
+    return () => window.removeEventListener("resize", updateScale);
+  }, []);
+
+  // Draw the content whenever scale changes
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const colors = getColors();
+    const filteredMovies = rowsData.filter((row) => row.movie !== "");
+    const moviesHeight =
+      filteredMovies.length * (BASE.padding.movieGap + BASE.padding.stripe);
+    const totalHeight = BASE.height.title + moviesHeight + BASE.height.footer;
+
+    // Set canvas dimensions with scaling
+    canvas.width = BASE.width * scale;
+    canvas.height = totalHeight * scale;
+    ctx.scale(scale, scale);
+
+    // Draw background
+    ctx.fillStyle = colors.green;
+    ctx.fillRect(0, 0, BASE.width, totalHeight);
+
+    // Draw header
+    ctx.fillStyle = colors.gray;
+    ctx.font = "bold 14px degular";
+    ctx.textAlign = "left";
+    ctx.fillText("TOP 2024", BASE.padding.side, 26);
+
+    // Draw title
+    ctx.fillStyle = colors.gray;
+    ctx.font = "bold 40px degular";
+    ctx.textAlign = "center";
+    ctx.fillText("MA RÉTRO", BASE.width / 2, 40);
+    ctx.fillText("2024", BASE.width / 2, 75); // Adjusted for leading-35px
+
+    // Draw right header text
+    ctx.textAlign = "right";
+    ctx.font = "bold 14px degular";
+    ctx.fillText(
+      fullName ? `PAR ${fullName.toUpperCase()}` : "#MARÉTRO",
+      BASE.width - BASE.padding.side,
+      26,
+    );
+
+    // Draw movies
+    filteredMovies.forEach((movie, index) => {
+      const yPos =
+        BASE.height.title +
+        index * (BASE.padding.movieGap + BASE.padding.stripe);
+
+      // Draw stripe
+      ctx.fillStyle = colors.gray;
+      ctx.fillRect(0, yPos, BASE.width, BASE.padding.stripe);
+
+      // Draw text
+      ctx.fillStyle = colors.green;
+      ctx.font = "bold 16px degular";
+      ctx.textAlign = "center";
+      ctx.fillText(
+        `${index + 1}. ${movie.movie}`,
+        BASE.width / 2,
+        yPos + BASE.padding.stripe / 2 + 6,
+      );
+    });
+
+    // Draw footer text
+    ctx.fillStyle = colors.gray;
+    ctx.textAlign = "left";
+    ctx.font = "bold 14px degular";
+    ctx.fillText("TOP 2024", BASE.padding.side, totalHeight - 20);
+
+    // Load and draw logo
+    const logo = new Image();
+    logo.src = "/img/logo-gray.png";
+    logo.onload = () => {
+      ctx.drawImage(logo, BASE.width / 2 - 78.5, totalHeight - 55, 157, 40);
+    };
+
+    // Draw right footer text
+    ctx.textAlign = "right";
+    ctx.fillText("#MARÉTRO", BASE.width - BASE.padding.side, totalHeight - 20);
+  }, [scale, rowsData, fullName]);
+
   return (
-    <div className="w-[100%] bg-retro-green lg:w-500px">
-      <div
-        style={{
-          padding: SHARE_CONFIG.spacing.contentPadding,
-        }}
-      >
-        <div className="relative flex grow items-start">
-          <div className={`absolute left-0 top-0 ${cornerTextStyle}`}>
-            Top 2024
-          </div>
-          <div className="flex grow items-center justify-center text-center font-degular text-40px font-bold uppercase leading-35px text-retro-gray">
-            Ma Rétro
-            <br />
-            2024
-          </div>
-          <div className={`absolute right-0 top-0 ${cornerTextStyle}`}>
-            {fullName ? <>Par {fullName}</> : <>#MaRétro2024</>}
-          </div>
-        </div>
-      </div>
-      <div
-        className="flex flex-col bg-retro-gray"
-        style={{
-          paddingLeft: SHARE_CONFIG.spacing.contentPadding,
-          paddingRight: SHARE_CONFIG.spacing.contentPadding,
-        }}
-      >
-        {filteredMovies.map((row, index) => (
-          <div
-            key={index}
-            className={clsx(
-              "flex w-full justify-center border-retro-green px-10px py-5px text-center text-retro-green",
-              index === 0
-                ? "border-b-[0.5px]"
-                : index === filteredMovies.length - 1
-                  ? "border-t-[0.5px]"
-                  : "border-y-[0.5px]",
-            )}
-          >
-            {index + 1}. {row.movie}
-          </div>
-        ))}
-      </div>
-      <div
-        style={{
-          padding: SHARE_CONFIG.spacing.contentPadding,
-        }}
-      >
-        <div className="relative flex grow items-end">
-          <div className={`absolute bottom-0 left-0 ${cornerTextStyle}`}>
-            Top 2024
-          </div>
-          <div className="flex grow items-center justify-center">
-            <img
-              src="/img/logo-gray.png"
-              alt="Logo"
-              className="h-auto w-157px max-w-[40%]"
-            />
-          </div>
-          <div className={`absolute bottom-0 right-0 ${cornerTextStyle}`}>
-            #MaRétro2024
-          </div>
-        </div>
-      </div>
+    <div ref={containerRef} className="w-full lg:w-500px">
+      <canvas ref={canvasRef} style={{ width: "100%", height: "auto" }} />
     </div>
   );
 }
 
 function SharePage({ rowsData, fullName }: ShareableContentProps) {
+  const handleDownload = () => {
+    const canvas = document.querySelector(
+      "#shareableContent canvas",
+    ) as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const link = document.createElement("a");
+    link.download = "ma-retro-2024.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
   return (
     <>
-      <div className="flex justify-center pb-20px" id="shareableContent">
+      <div id="shareableContent" className="flex justify-center pb-20px">
         <ShareableContent rowsData={rowsData} fullName={fullName} />
       </div>
       <div className="border-t py-20px">
@@ -227,6 +304,7 @@ function SharePage({ rowsData, fullName }: ShareableContentProps) {
       </div>
       <div className="flex flex-col gap-y-10px">
         <TextBox link="/sondage-2024">Modifier ma rétrospective</TextBox>
+        <TextBox onClick={handleDownload}>Télécharger ma rétrospective</TextBox>
       </div>
     </>
   );

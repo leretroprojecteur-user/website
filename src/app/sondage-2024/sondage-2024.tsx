@@ -142,7 +142,7 @@ const BASE = {
   padding: {
     side: 20, // Side padding
     stripe: 30, // Movie stripe height
-    movieGap: 10, // Gap between movies
+    movieGap: 7, // Gap between movies
   },
   height: {
     title: 120, // Title section height
@@ -239,9 +239,11 @@ function ShareableContent({ rowsData, fullName }: ShareableContentProps) {
         BASE.height.title +
         index * (BASE.padding.movieGap + BASE.padding.stripe);
 
-      // Draw stripe
+      // Draw stripe (90% width, centered)
       ctx.fillStyle = colors.gray;
-      ctx.fillRect(0, yPos, BASE.width, BASE.padding.stripe);
+      const stripeWidth = BASE.width * 1; // 90% of total width
+      const stripeX = (BASE.width - stripeWidth) / 2; // Center the stripe
+      ctx.fillRect(stripeX, yPos, stripeWidth, BASE.padding.stripe);
 
       // Draw text
       ctx.fillStyle = colors.green;

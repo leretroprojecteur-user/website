@@ -141,15 +141,36 @@ interface ShareableContentProps {
 }
 
 const BASE = {
-  width: 500, // SVG width
-  padding: {
-    side: 20, // Side padding
-    stripe: 30, // Movie stripe height
-    movieGap: 7, // Gap between movies
+  width: 500,
+  padding: 20,
+  stripe: {
+    paddingX: 10,
+    paddingY: 5,
+    height: 40, // Explicit height for each movie stripe
   },
   height: {
-    title: 120, // Title section height
-    footer: 80, // Footer height
+    title: 120,
+    footer: 120, // Increased footer height to ensure visibility
+  },
+} as const;
+
+// Corner text configuration
+const CORNER_TEXT = {
+  style: {
+    fontSize: 20, // Now using a number for fontSize
+    fontWeight: "semibold",
+    fontFamily: "system-ui",
+    color: "text-retro-blue",
+  },
+  position: {
+    topOffset: 26,
+    bottomOffset: 40, // Increased to make bottom text more visible
+    sideOffset: 20,
+  },
+  content: {
+    topLeft: "TOP 2024",
+    bottomLeft: "TOP 2024",
+    bottomRight: "#MARÉTRO2024",
   },
 } as const;
 
@@ -160,21 +181,49 @@ function ShareableContent({ rowsData, fullName }: ShareableContentProps) {
 
   // Get colors from Tailwind classes
   const getColors = () => {
-    // Create temporary elements to get computed colors
-    const greenEl = document.createElement("div");
-    const grayEl = document.createElement("div");
-    greenEl.className = "bg-retro-green";
-    grayEl.className = "bg-retro-gray";
-    document.body.appendChild(greenEl);
-    document.body.appendChild(grayEl);
+    const bordeauxEl = document.createElement("div");
+    const blueEl = document.createElement("div");
+    bordeauxEl.className = "bg-retro-bordeaux";
+    blueEl.className = CORNER_TEXT.style.color.replace("text-", "bg-");
+    document.body.appendChild(bordeauxEl);
+    document.body.appendChild(blueEl);
 
-    const green = window.getComputedStyle(greenEl).backgroundColor;
-    const gray = window.getComputedStyle(grayEl).backgroundColor;
+    const bordeaux = window.getComputedStyle(bordeauxEl).backgroundColor;
+    const blue = window.getComputedStyle(blueEl).backgroundColor;
 
-    document.body.removeChild(greenEl);
-    document.body.removeChild(grayEl);
+    document.body.removeChild(bordeauxEl);
+    document.body.removeChild(blueEl);
 
-    return { green, gray };
+    return { bordeaux, blue };
+  };
+
+  const drawCornerText = (
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    align: CanvasTextAlign,
+  ) => {
+    // Construct the font string properly
+    ctx.font = `${CORNER_TEXT.style.fontWeight} ${CORNER_TEXT.style.fontSize}px ${CORNER_TEXT.style.fontFamily}`;
+    ctx.textAlign = align;
+    // Add underline
+    ctx.textDecoration = "underline";
+    ctx.fillText(text.toUpperCase(), x, y);
+
+    // Manual underline since textDecoration doesn't work in canvas
+    const metrics = ctx.measureText(text.toUpperCase());
+    const lineWidth = metrics.width;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (align === "left") {
+      ctx.moveTo(x, y + 3);
+      ctx.lineTo(x + lineWidth, y + 3);
+    } else if (align === "right") {
+      ctx.moveTo(x - lineWidth, y + 3);
+      ctx.lineTo(x, y + 3);
+    }
+    ctx.stroke();
   };
 
   // Update scale based on container width
@@ -201,9 +250,21 @@ function ShareableContent({ rowsData, fullName }: ShareableContentProps) {
 
     const colors = getColors();
     const filteredMovies = rowsData.filter((row) => row.movie !== "");
-    const moviesHeight =
-      filteredMovies.length * (BASE.padding.movieGap + BASE.padding.stripe);
-    const totalHeight = BASE.height.title + moviesHeight + BASE.height.footer;
+
+    // Calculate total height with explicit sections
+    const titleSectionHeight = BASE.height.title; // 120px
+    const contentHeight = filteredMovies.length * 40; // 40px per movie
+    const footerSectionHeight = BASE.height.footer; // 80px
+    const totalHeight =
+      titleSectionHeight + contentHeight + footerSectionHeight;
+
+    console.log({
+      titleSectionHeight,
+      contentHeight,
+      footerSectionHeight,
+      totalHeight,
+      moviesCount: filteredMovies.length,
+    });
 
     // Set canvas dimensions with scaling
     canvas.width = BASE.width * scale;
@@ -211,70 +272,108 @@ function ShareableContent({ rowsData, fullName }: ShareableContentProps) {
     ctx.scale(scale, scale);
 
     // Draw background
-    ctx.fillStyle = colors.green;
+    ctx.fillStyle = colors.bordeaux;
     ctx.fillRect(0, 0, BASE.width, totalHeight);
 
-    // Draw header
-    ctx.fillStyle = colors.gray;
-    ctx.font = "bold 14px degular";
-    ctx.textAlign = "left";
-    ctx.fillText("TOP 2024", BASE.padding.side, 26);
+    // Set color for all corner text
+    ctx.fillStyle = colors.blue;
 
-    // Draw title
-    ctx.fillStyle = colors.gray;
-    ctx.font = "bold 40px degular";
-    ctx.textAlign = "center";
-    ctx.fillText("MA RÉTRO", BASE.width / 2, 40);
-    ctx.fillText("2024", BASE.width / 2, 75); // Adjusted for leading-35px
-
-    // Draw right header text
-    ctx.textAlign = "right";
-    ctx.font = "bold 14px degular";
-    ctx.fillText(
-      fullName ? `PAR ${fullName.toUpperCase()}` : "#MARÉTRO",
-      BASE.width - BASE.padding.side,
-      26,
+    // Draw corner texts
+    drawCornerText(
+      ctx,
+      CORNER_TEXT.content.topLeft,
+      CORNER_TEXT.position.sideOffset,
+      CORNER_TEXT.position.topOffset,
+      "left",
     );
 
-    // Draw movies
+    drawCornerText(
+      ctx,
+      fullName ? `PAR ${fullName}` : CORNER_TEXT.content.bottomRight,
+      BASE.width - CORNER_TEXT.position.sideOffset,
+      CORNER_TEXT.position.topOffset,
+      "right",
+    );
+
+    // Draw title
+    ctx.fillStyle = colors.blue;
+    ctx.font = "bold 40px degular";
+    ctx.textAlign = "center";
+    ctx.fillText("MA RÉTRO", BASE.width / 2, 45);
+    ctx.fillText("2024", BASE.width / 2, 80);
+
+    // Draw movies section
+    const moviesStart = BASE.height.title;
+    const moviesLinewidth = 1.25;
+    const moviesHeight =
+      filteredMovies.length * BASE.stripe.height +
+      (filteredMovies.length - 1) * length * moviesLinewidth;
+    const moviesEnd = moviesStart + moviesHeight;
+
+    // Draw movies background
+    ctx.fillStyle = colors.blue;
+    ctx.fillRect(0, moviesStart, BASE.width, moviesHeight);
+
+    // Draw movies with proper spacing
     filteredMovies.forEach((movie, index) => {
       const yPos =
-        BASE.height.title +
-        index * (BASE.padding.movieGap + BASE.padding.stripe);
-
-      // Draw stripe (90% width, centered)
-      ctx.fillStyle = colors.gray;
-      const stripeWidth = BASE.width * 1; // 90% of total width
-      const stripeX = (BASE.width - stripeWidth) / 2; // Center the stripe
-      ctx.fillRect(stripeX, yPos, stripeWidth, BASE.padding.stripe);
-
-      // Draw text
-      ctx.fillStyle = colors.green;
-      ctx.font = "bold 16px degular";
+        2 +
+        BASE.stripe.height / 2 +
+        moviesStart +
+        index * (BASE.stripe.height + moviesLinewidth);
+      ctx.fillStyle = colors.bordeaux;
+      ctx.font = "normal 16px system-ui";
       ctx.textAlign = "center";
-      ctx.fillText(
-        `${index + 1}. ${movie.movie}`,
-        BASE.width / 2,
-        yPos + BASE.padding.stripe / 2 + 6,
-      );
+      ctx.fillText(`${index + 1}. ${movie.movie}`, BASE.width / 2, yPos);
+
+      if (index < filteredMovies.length - 1) {
+        ctx.strokeStyle = colors.bordeaux;
+        ctx.lineWidth = moviesLinewidth;
+        ctx.beginPath();
+        ctx.moveTo(BASE.padding, yPos + BASE.stripe.height / 2);
+        ctx.lineTo(BASE.width - BASE.padding, yPos + BASE.stripe.height / 2);
+        ctx.stroke();
+      }
     });
 
-    // Draw footer text
-    ctx.fillStyle = colors.gray;
-    ctx.textAlign = "left";
-    ctx.font = "bold 14px degular";
-    ctx.fillText("TOP 2024", BASE.padding.side, totalHeight - 20);
+    // Calculate footer positions
+    const footerStart = moviesEnd;
+    const logoHeight = 40;
+    const logoWidth = 157;
+    const logoY = footerStart + (BASE.height.footer - logoHeight) / 2;
+    const bottomTextY = footerStart + BASE.height.footer - 20; // Position text below logo
 
-    // Load and draw logo
+    // Draw bottom corner texts
+    ctx.fillStyle = colors.blue;
+    drawCornerText(
+      ctx,
+      CORNER_TEXT.content.bottomLeft,
+      CORNER_TEXT.position.sideOffset,
+      bottomTextY,
+      "left",
+    );
+
+    // Load and draw logo centered in footer
     const logo = new Image();
-    logo.src = "/img/logo-gray.png";
+    logo.src = "/img/logo-blue.png";
     logo.onload = () => {
-      ctx.drawImage(logo, BASE.width / 2 - 78.5, totalHeight - 55, 157, 40);
+      ctx.drawImage(
+        logo,
+        BASE.width / 2 - logoWidth / 2,
+        logoY,
+        logoWidth,
+        logoHeight,
+      );
     };
 
-    // Draw right footer text
-    ctx.textAlign = "right";
-    ctx.fillText("#MARÉTRO", BASE.width - BASE.padding.side, totalHeight - 20);
+    // Draw bottom right text
+    drawCornerText(
+      ctx,
+      CORNER_TEXT.content.bottomRight,
+      BASE.width - CORNER_TEXT.position.sideOffset,
+      bottomTextY,
+      "right",
+    );
   }, [scale, rowsData, fullName]);
 
   return (

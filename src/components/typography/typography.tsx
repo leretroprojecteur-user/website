@@ -28,9 +28,20 @@ export function SousTitre1({
   );
 }
 
-export function SousTitre2({ children }: { children: ReactNode }) {
+export function SousTitre2({
+  children,
+  textColor = "retro-gray",
+}: {
+  children: ReactNode;
+  textColor?: string;
+}) {
   return (
-    <div className="text-21px font-semibold uppercase leading-25px tracking-normal text-retro-gray lg:text-25px lg:leading-25px lg:tracking-[-0.01em]">
+    <div
+      className={clsx(
+        `text-${textColor}`,
+        "text-21px font-semibold uppercase leading-25px tracking-normal lg:text-25px lg:leading-25px lg:tracking-[-0.01em]",
+      )}
+    >
       {children}
     </div>
   );

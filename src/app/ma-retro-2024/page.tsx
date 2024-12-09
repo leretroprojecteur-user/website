@@ -2,16 +2,17 @@ import { Metadata } from "next";
 
 import { getMovies } from "@/lib/movies";
 
-import Sondage2024 from "./sondage-2024";
+import MaRetro2024 from "./ma-retro-2024";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Sondage Top 2024",
+  title: "Ma Rétrospective 2024",
+  description: "Votez pour vos meilleures découvertes de cinéma cette annéee !",
 };
 
 export default function SubmitScreeningsPage() {
   const allMovies = getMovies();
 
-  return <Sondage2024 allMoviesPromise={allMovies} />;
+  return <MaRetro2024 allMoviesPromise={allMovies} />;
 }

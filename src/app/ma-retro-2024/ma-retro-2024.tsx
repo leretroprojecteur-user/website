@@ -90,9 +90,9 @@ function MovieRow({
   return (
     <SondageRow
       cell1={
-        <div className="flex h-full items-center justify-center border text-center text-retro-gray">
+        <div className="flex h-full items-center justify-center border text-center text-retro-bordeaux">
           {index + 1}
-          {index < 5 && <span className="text-retro-red">*</span>}
+          {index < 5 && <span className="text-retro-bordeaux">*</span>}
         </div>
       }
       cell2={
@@ -100,6 +100,7 @@ function MovieRow({
           <RetroInput
             value={searchTerm}
             setValue={(st) => setSearchFind(st)}
+            blue={true}
             leftAlignPlaceholder
             customTypography
             placeholder={"Rechercher un film...".toUpperCase()}
@@ -108,11 +109,13 @@ function MovieRow({
           <SuspenseWithLoading hideLoading={searchTerm.length === 0}>
             {showResults && (
               <SearchResults
+                altColor="retro-blue"
                 className="border-x px-5px py-2px"
                 nbResults={5}
                 searchTerm={searchTerm}
                 allDataPromise={allMoviesPromise}
                 noResultsText="Nous ne trouvons pas votre film, mais vous pouvez le renseigner manuellement."
+                lowercase={true}
                 onClick={(movie) => {
                   setSearchFind(
                     `${movie.title}, ${movie.directors} (${movie.year})`,
@@ -277,6 +280,75 @@ function ShareableContent({ rowsData, fullName }: ShareableContentProps) {
   return (
     <div ref={containerRef} className="w-full lg:w-500px">
       <canvas ref={canvasRef} style={{ width: "100%", height: "auto" }} />
+      {/* =======
+  const filteredMovies = rowsData.filter((row) => row.movie !== "");
+  const cornerTextStyle = "font-bold text-retro-blue underline hidden lg:block";
+  return (
+    <div className="w-[100%] bg-retro-bordeaux lg:w-500px">
+      <div
+        style={{
+          padding: SHARE_CONFIG.spacing.contentPadding,
+        }}
+      >
+        <div className="relative flex grow items-start">
+          <div className={`absolute left-0 top-0 ${cornerTextStyle}`}>
+            Top 2024
+          </div>
+          <div className="flex grow items-center justify-center text-center font-degular text-40px font-bold uppercase leading-35px text-retro-blue">
+            Ma Rétro
+            <br />
+            2024
+          </div>
+          <div className={`absolute right-0 top-0 ${cornerTextStyle}`}>
+            {fullName ? <>Par {fullName}</> : <>#MaRétro2024</>}
+          </div>
+        </div>
+      </div>
+      <div
+        className="flex flex-col bg-retro-blue"
+        style={{
+          paddingLeft: SHARE_CONFIG.spacing.contentPadding,
+          paddingRight: SHARE_CONFIG.spacing.contentPadding,
+        }}
+      >
+        {filteredMovies.map((row, index) => (
+          <div
+            key={index}
+            className={clsx(
+              "flex w-full justify-center border-retro-bordeaux px-10px py-5px text-center text-retro-bordeaux",
+              index === 0
+                ? "border-b-[0.5px]"
+                : index === filteredMovies.length - 1
+                  ? "border-t-[0.5px]"
+                  : "border-y-[0.5px]",
+            )}
+          >
+            {index + 1}. {row.movie}
+          </div>
+        ))}
+      </div>
+      <div
+        style={{
+          padding: SHARE_CONFIG.spacing.contentPadding,
+        }}
+      >
+        <div className="relative flex grow items-end">
+          <div className={`absolute bottom-0 left-0 ${cornerTextStyle}`}>
+            Top 2024
+          </div>
+          <div className="flex grow items-center justify-center">
+            <img
+              src="/img/logo-blue.png"
+              alt="Logo"
+              className="h-auto w-157px max-w-[40%]"
+            />
+          </div>
+          <div className={`absolute bottom-0 right-0 ${cornerTextStyle}`}>
+            #MaRétro2024
+          </div>
+        </div>
+      </div>
+>>>>>>> ugo/sondage-2024:src/app/ma-retro-2024/ma-retro-2024.tsx */}
     </div>
   );
 }
@@ -305,14 +377,14 @@ function SharePage({ rowsData, fullName }: ShareableContentProps) {
         voter&nbsp;!
       </div>
       <div className="flex flex-col gap-y-10px">
-        <TextBox link="/sondage-2024">Modifier ma rétrospective</TextBox>
+        <TextBox link="/ma-retro-2024">Modifier ma rétrospective</TextBox>
         <TextBox onClick={handleDownload}>Télécharger ma rétrospective</TextBox>
       </div>
     </>
   );
 }
 
-export default function Sondage2024({
+export default function MaRetro2024({
   allMoviesPromise,
 }: {
   allMoviesPromise: Promise<SearchMovie[]>;
@@ -414,16 +486,18 @@ export default function Sondage2024({
                 />
                 {/* Top */}
                 <div className="flex flex-col gap-y-10px">
-                  <div className="border-y bg-retro-green uppercase">
+                  <div className="border-y bg-retro-blue uppercase">
                     <SondageRow
                       cell1={
-                        <div className="py-6px text-center font-bold lg:py-17px">
-                          <SousTitre2>#</SousTitre2>
+                        <div className="retro-bordeaux py-6px text-center font-bold lg:py-17px">
+                          <SousTitre2 textColor="retro-bordeaux">#</SousTitre2>
                         </div>
                       }
                       cell2={
                         <div className="py-6px text-center font-bold lg:py-17px">
-                          <SousTitre2>Film</SousTitre2>
+                          <SousTitre2 textColor="retro-bordeaux">
+                            Film
+                          </SousTitre2>
                         </div>
                       }
                     />

@@ -223,7 +223,7 @@ export function SearchResults({
             )}
           </>
         ) : (
-          <div className="pt-15px lg:pt-20px">
+          <div className="pt-11px lg:pt-13px">
             <MetaCopy lowercase={lowercase}>{noResultsText}</MetaCopy>
           </div>
         )}

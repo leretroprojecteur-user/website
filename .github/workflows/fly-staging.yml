@@ -2,7 +2,7 @@ name: Fly Deploy (staging)
 on:
   push:
     branches:
-      - nico/poll-banner
+      - ugo/new-search
 jobs:
   deploy:
     name: Deploy app

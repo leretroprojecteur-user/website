@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { getAllMovies } from "@/lib/movies";
+import { searchMovies } from "@/lib/movies";
 
 import Recherche from "./recherche";
 
@@ -11,8 +11,13 @@ export const metadata: Metadata = {
   description: "Recherchez un film qui passe en salle à Paris",
 };
 
-export default function RecherchePage() {
-  const allMovies = getAllMovies();
+export default function RecherchePage({
+  searchParams,
+}: {
+  searchParams: { q?: string };
+}) {
+  const query = searchParams.q || "";
+  const movies = searchMovies(query);
 
-  return <Recherche allMoviesPromise={allMovies} />;
+  return <Recherche initialQuery={query} searchPromise={movies} />;
 }

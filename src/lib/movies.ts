@@ -7,9 +7,12 @@ import {
   where,
 } from "firebase/firestore";
 import { keyBy, uniq } from "lodash-es";
+import { orderBy, take } from "lodash-es";
 import { DateTime } from "luxon";
 import { unstable_cache } from "next/cache";
 import "server-only";
+
+import { getFields, getMovieInfoString, stringMatchFields } from "@/lib/util";
 
 import { getFirebase } from "./firebase";
 import {
@@ -129,7 +132,7 @@ export const getAllMovies = unstable_cache(
     });
   },
   ["all-movies"],
-  { revalidate: 180 },
+  { revalidate: 500 },
 );
 
 export const getReviewedMovies = unstable_cache(
@@ -156,3 +159,34 @@ export const getMovie = unstable_cache(
   ["single-movie"],
   { revalidate: 60 },
 );
+
+export const searchMovies = async (query: string): Promise<SearchMovie[]> => {
+  if (!query) return [];
+
+  // Cache the filtered results for each query
+  const getCachedResults = unstable_cache(
+    async (searchQuery: string) => {
+      const allMovies = await getAllMovies();
+      const keywords = getFields(searchQuery);
+
+      const moviesWithFields: Array<[SearchMovie, string[]]> = allMovies.map(
+        (movie) => [movie, getFields(getMovieInfoString(movie))],
+      );
+
+      const filtered = take(
+        moviesWithFields
+          .filter(([_, fields]: [SearchMovie, string[]]) =>
+            stringMatchFields(keywords, fields),
+          )
+          .map(([movie]: [SearchMovie, string[]]) => movie),
+        50,
+      );
+
+      return orderBy(filtered, (movie) => movie.relevance_score, "desc");
+    },
+    [`search-${query}`],
+    { revalidate: 500 },
+  );
+
+  return getCachedResults(query);
+};

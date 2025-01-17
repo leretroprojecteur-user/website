@@ -8,7 +8,7 @@ import SubmitScreenings from "./rajouter-des-seances";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Rajouter des séances",
+  title: "Portail Séances",
 };
 
 export default function SubmitScreeningsPage() {

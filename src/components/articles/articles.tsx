@@ -34,6 +34,14 @@ export function ArticleLayout({
   );
 }
 
+export function Breakout({ children }: { children: ReactNode }) {
+  return (
+    <div className="breakout-section py-10px lg:col-span-3 3col:pl-20px">
+      {children}
+    </div>
+  );
+}
+
 export function MiddleColumn({ children }: { children: ReactNode }) {
   return (
     <>

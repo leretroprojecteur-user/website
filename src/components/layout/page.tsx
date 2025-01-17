@@ -48,7 +48,7 @@ export function ThreeColumnPage({
   children?: ReactNode;
 }) {
   return (
-    <div className="mx-auto my-0 block max-w-[32rem] wide-article:max-w-[37.5rem] lg:m-0 lg:grid lg:max-w-none lg:grid-cols-[0_32rem_1fr] lg:pl-20px 3col:grid-cols-[minmax(13rem,_1fr)_minmax(30rem,_40rem)_minmax(13rem,_1fr)] 3col:pl-0">
+    <div className="mx-auto my-0 block max-w-[32rem] grow wide-article:max-w-[37.5rem] lg:m-0 lg:grid lg:max-w-none lg:grid-cols-[0_32rem_1fr] lg:pl-20px 3col:grid-cols-[minmax(13rem,_1fr)_minmax(30rem,_40rem)_minmax(13rem,_1fr)] 3col:pl-0">
       {header && (
         <>
           <div className="invisible h-0 self-center justify-self-center px-30px text-center 3col:visible 3col:h-auto">
